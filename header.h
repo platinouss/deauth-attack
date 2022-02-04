@@ -27,8 +27,13 @@ struct Deauth_frame {
     uint16_t frag_sequence_num = 0x1000;
 };
 
-struct Fixed_param {
+struct fixed_param {
     uint16_t reason_code = 0x0007;
+};
+
+struct a_fixed_param {
+    uint16_t auth_algorithm = 0x0100;
+    uint8_t auth_seq = 0x00;
 };
 
 #pragma pack(pop)
