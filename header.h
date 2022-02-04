@@ -17,7 +17,7 @@ struct Radiotaps {
     uint32_t data = 0x020018;
 };
 
-struct Deaut_frame {
+struct Deauth_frame {
     uint8_t type = 0xc0;
     uint8_t subtype = 0x00;
     uint16_t duration = 0x0000;
