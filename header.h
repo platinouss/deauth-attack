@@ -23,7 +23,7 @@ struct Deaut_frame {
     uint16_t duration = 0x0000;
     u_char recv_dst_addr[MAC_ADDR_LEN] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     u_char trans_src_addr[MAC_ADDR_LEN];
-    u_char bssid_addr[MAC_ADDR_LEN];
+    u_char bssid[MAC_ADDR_LEN];
     uint16_t frag_sequence_num = 0x1000;
 };
 
